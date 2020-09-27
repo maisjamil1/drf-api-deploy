@@ -1,3 +1,4 @@
+- install doker :`https://www.docker.com/get-started`
 - `mkdir drf-api`
 - `cd drf-api`
 - `poetry init -n`
@@ -103,3 +104,39 @@ urlpatterns = [
 
 ```
 - `python manage.py  runserver`
+- in root create `Dockerfile` inside it write:
+```
+FROM python:3
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+RUN mkdir /code
+WORKDIR /code
+COPY requirements.txt /code/
+RUN pip install -r requirements.txt
+COPY . /code/
+```
+- in root create `docker-compose.yml` inside it write:
+```
+version: '3'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+
+```
+- in the `settings.py` --->add `ALLOWED_HOSTS = ['0.0.0.0',]`
+- `python manage.py runserver 0.0.0.0:8000`
+- `poetry export -f requirements.txt -o requirements.txt`
+- open docker
+- `docker-compose up`
+- if it didnt work:
+- open docker-->dashboard --->start--->open in window  settings#ALLOWED_HOSTS = ['0.0.0.0','localhost','127.0.0.1']
+- or try:
+- `docker-compose down`
+- `docker-compose build`
+- `docker-compose up`
