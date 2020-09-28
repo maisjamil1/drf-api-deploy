@@ -141,6 +141,7 @@ services:
 - `docker-compose build`
 - `docker-compose up`
 _______________________________________________________________________________________
+# permissions
 - `poetry shell`
 - `poetry install`
 - `python run server`
@@ -176,3 +177,50 @@ permission_classes = (IsAuthorOrReadOnly,)
 
 ```
 - ` python manage.py runserver`
+
+
+
+# postgres
+- go to `settings.py` :
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
+    }
+}
+
+```
+- edit`docker-compose.yml` :
+```python
+version: '3'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+        - db
+  db:
+      image: postgres:11
+      environment:
+          - "POSTGRES_HOST_AUTH_METHOD=trust"
+
+```
+- `poetry add psycopg2`
+- `poetry export -f requirements.txt -o requirements.txt`
+- exit poetry
+- `docker-compose run web python manage.py makemirgation `
+- `docker-compose run web ptyhon manage.py migrate `
+- `docker-compose run web python manage.py createsuperuser `
+- `docker-compose up`
+- to run test :
+- `docker-compose run web python manage.py test`
