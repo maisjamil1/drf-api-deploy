@@ -140,3 +140,39 @@ services:
 - `docker-compose down`
 - `docker-compose build`
 - `docker-compose up`
+_______________________________________________________________________________________
+- `poetry shell`
+- `poetry install`
+- `python run server`
+- `python run server`
+- go `settings.py` edit :
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASS': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+```
+- go to `movies_project/urls.py` add to urlpatterns `path('api-auth', include('rest_framework.urls')),`
+- create `movie/permissions.py` add inside it :
+```python
+from rest_framework import permissions
+
+class IsAuthorOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+
+        return obj.author == request.user
+
+```
+- go to `movie/views.py` add:
+```python 
+from .permissions import IsAuthorOrReadOnly
+#to class MovieDetails add:
+permission_classes = (IsAuthorOrReadOnly,)
+
+```
+- ` python manage.py runserver`
