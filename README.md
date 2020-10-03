@@ -226,6 +226,9 @@ services:
 - `docker-compose run web python manage.py test`
 _______________________________________________________________________
 # tokens
+- `poetry shell`
+- `pip uninstall psycopg2`
+- `poetry add psycopg2-binary`
 - `poetry add djangorestframework_simplejwt` make sure to change pyproject.toml--> `python = "~3.8"`
 - `poetry add gunicorn` # Running Django in Gunicorn as a generic WSGI application/to run production mode
 - `poetry add whitenoise`# allows your web app to serve its own static files, making it a self-contained
@@ -306,3 +309,109 @@ MIDDLEWARE = [
 - or try postman
 
 
+________________________________________________________________________
+# deployment
+- `poetry add django-cors-headers`
+- `poetry add django-environ`
+- `poetry export -f requirements.txt -o requirements.txt`
+- create `movies_project/sample.env` paste:
+```python
+DEBUG=on
+SECRET_KEY=put-real-secret-key-here
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+DATABASE_PASSWORD=put-real-db-password-here
+DATABASE_HOST=db
+DATABASE_PORT=5432
+ALLOWED_HOSTS=localhost,127.0.0.1,172.16.0.163
+```
+- Create `movies_project/.env` add:
+```python
+DEBUG=on
+SECRET_KEY=3*n--@6j*4%l#+^_j1l*)8b419fd4k84n@8orw_^j^(#d=#fmc
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_HOST=db
+DATABASE_PORT=5432
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+
+```
+- go to `settings` add:# to read .env file
+```python 
+import environ
+
+env = environ.Env(
+    # DEBUG is Flase by default
+    DEBUG = (bool, False)
+)
+# Read .env file
+environ.Env.read_env()
+```
+- go to `settings` change:
+```python
+SECRET_KEY = env.str('SECRET_KEY')
+DEBUG = env.bool('DEBUG')
+ALLOWED_HOSTS = tuple(env.list('ALLOWED_HOSTS'))
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.str('DATABASE_NAME'),
+        'USER': env.str('DATABASE_USER'),
+        'PASSWORD': env.str('DATABASE_PASSWORD'),
+        'HOST': env.str('DATABASE_HOST'),
+        'PORT': env.str('DATABASE_PORT')
+    }
+}
+
+```
+- `docker-compose up --build -d`
+- in  `movies_project/.env`change:
+```python
+DEBUG=off
+```
+- `docker-compose restart`
+- if it give u in the browser--> server error 500 -->`docker-compose exec web python manage.py makemigrations `--->
+`docker-compose exec web python manage.py migrate `-->`docker-compose restart`
+- in the root create `static` folder 
+- `docker-compose exec web python manage.py collectstatic`
+- `docker-compose exec web python manage.py createsuperuser`
+
+- go to `settings` add :
+
+```python
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
+    'django.contrib.staticfiles',
+
+    'rest_framework',
+
+    'corsheaders',###########
+
+    'movie.apps.MovieConfig',  
+]
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',###########
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+```
+- go to `settings` add :
+```python 
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+]
+```
