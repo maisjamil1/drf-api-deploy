@@ -434,3 +434,5 @@ release:
 run:
     web: gunicorn movies_project.wsgi
 ```
+- `git init`
+- `heroku git:remote -a maismoviesapp1`
