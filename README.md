@@ -436,3 +436,8 @@ run:
 ```
 - `git init`
 - `heroku git:remote -a maismoviesapp1`
+- `heroku stack:set container`
+- ` git push heroku master`
+- add Config Vars in heroku
+- edit this in .env file and herokyu`ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,.maismoviesapp1.com,maismoviesapp1.herokuapp.com`
+- also in heroku `Config Vars` -->ADD `DJANGO_ALLOWED_HOSTS`= `.maismoviesapp1.com,maismoviesapp1.herokuapp.com`
