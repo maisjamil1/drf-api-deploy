@@ -415,3 +415,22 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
 ]
 ```
+
+________________________________________________________
+
+- `docker-compose up -d --build`
+- `heroku create maismoviesapp1`
+- `https://maismoviesapp1.herokuapp.com/`
+- in root create `heroku.yml`add:
+```python
+build:
+    docker:
+        web: Dockerfile
+release:
+    image: web
+    command:
+        - mkdir -p static
+        - python manage.py collectstatic --noinput
+run:
+    web: gunicorn movies_project.wsgi
+```
